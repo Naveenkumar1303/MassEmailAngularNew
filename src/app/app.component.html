@@ -1,0 +1,128 @@
+@if (auth.isAuthenticated()) {
+  <div class="app-shell d-flex min-vh-100" [attr.data-theme]="theme()">
+    <aside class="app-sidebar d-flex flex-column gap-3" [class.is-open]="mobileMenuOpen()"
+      style="width:280px;background:rgba(var(--card-rgb),.94);border-right:1px solid var(--border)">
+      <div class="brand-panel d-flex align-items-center gap-2 pb-3 border-bottom">
+        <div class="brand-mark d-inline-grid rounded-4 text-white"
+          style="width:2.4rem;height:2.4rem;background:linear-gradient(135deg,var(--accent),#8b5cf6)">✉</div>
+        <div>
+          <p class="eyebrow mb-0">MassEmail Studio</p>
+          <h1 class="h6 mb-0">Command center</h1>
+        </div>
+      </div>
+
+      <div class="sidebar-nav d-flex flex-column gap-2 flex-grow-1">
+        <a routerLink="/dashboard"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{ exact: true }"
+           class="nav-link d-flex align-items-center gap-2 rounded-3"
+           (click)="closeSidebar()">
+          <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+          <span>Dashboard</span>
+        </a>
+
+        <a routerLink="/campaigns"
+           routerLinkActive="active"
+           class="nav-link d-flex align-items-center gap-2 rounded-3"
+           (click)="closeSidebar()">
+          <span class="nav-icon"><i class="bi bi-send"></i></span>
+          <span>Campaigns</span>
+        </a>
+
+        @if (showQueue()) {
+          <a [routerLink]="queueLink()"
+             routerLinkActive="active"
+             class="nav-link nav-sub d-flex align-items-center gap-2 rounded-3"
+             (click)="closeSidebar()">
+            <span class="nav-icon"><i class="bi bi-list-task"></i></span>
+            <span>Email queue</span>
+          </a>
+        }
+
+        <a routerLink="/templates"
+           routerLinkActive="active"
+           class="nav-link d-flex align-items-center gap-2 rounded-3"
+           (click)="closeSidebar()">
+          <span class="nav-icon"><i class="bi bi-file-earmark-richtext"></i></span>
+          <span>Templates</span>
+        </a>
+      </div>
+
+      <div class="sidebar-footer pt-3 border-top">
+        <a href="http://localhost:5000/swagger" target="_blank" rel="noreferrer" class="nav-link d-flex align-items-center gap-2 rounded-3">
+          <span class="nav-icon"><i class="bi bi-box-arrow-up-right"></i></span>
+          <span>Open API docs</span>
+        </a>
+      </div>
+    </aside>
+
+    @if (mobileMenuOpen()) {
+      <div class="mobile-backdrop" (click)="closeSidebar()"></div>
+    }
+
+    <section class="content-shell flex-fill p-3 p-lg-4">
+      <header class="topbar d-flex justify-content-between align-items-center gap-3 mb-3">
+        <div class="topbar-start d-flex align-items-center gap-3">
+          <button class="icon-btn btn btn-outline-secondary rounded-circle d-inline-flex align-items-center justify-content-center d-lg-none" type="button" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <div>
+            <p class="eyebrow mb-0">Operational overview</p>
+            <h2 class="h5 mb-0">Mass email operations</h2>
+          </div>
+        </div>
+
+        <div class="topbar-actions d-flex align-items-center gap-2">
+          <button class="icon-btn btn btn-outline-secondary rounded-circle d-inline-flex align-items-center justify-content-center" type="button" (click)="toggleTheme()" aria-label="Toggle theme">
+            <i class="bi" [class.bi-moon-stars]="theme() === 'light'" [class.bi-sun]="theme() === 'dark'"></i>
+          </button>
+
+          <div class="profile-menu position-relative">
+            <button class="profile-trigger btn btn-outline-secondary rounded-pill d-flex align-items-center gap-2" type="button" (click)="toggleProfileMenu()">
+              <span class="avatar d-inline-grid rounded-circle text-white fw-bold" style="width:2.1rem;height:2.1rem;background:linear-gradient(135deg,var(--accent),#8b5cf6)">AM</span>
+              <span class="text-start">
+                <strong class="d-block">Admin Manager</strong>
+                <small class="d-block text-muted">Operations lead</small>
+              </span>
+              <i class="bi bi-chevron-down"></i>
+            </button>
+
+            @if (profileMenuOpen()) {
+              <div class="profile-dropdown position-absolute end-0 mt-2 border rounded-4 bg-body shadow-sm" style="width:250px;padding:.75rem;z-index:5">
+                <div class="dropdown-header pb-2 mb-2 border-bottom">
+                  <strong class="d-block">Admin Manager</strong>
+                  <small class="d-block text-muted">admin&#64;massemail.io</small>
+                </div>
+                <button type="button" class="dropdown-action btn btn-link d-flex align-items-center gap-2 w-100 text-start" (click)="logout()">
+                  <i class="bi bi-box-arrow-right"></i>
+                  Sign out
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </header>
+
+      <div class="router-frame" [@routeFade]="prepareRoute(outlet)">
+        <router-outlet #outlet="outlet" />
+      </div>
+    </section>
+
+    <div class="toast-container position-fixed bottom-0 end-0 d-flex flex-column gap-2" style="right:1rem;bottom:1rem;z-index:1100">
+      @for (toast of notify.toasts(); track toast.id) {
+        <div class="toast toast--{{ toast.type }} bg-body border rounded-4 shadow-sm p-3 d-flex gap-2 align-items-start" style="width:min(380px,calc(100vw - 2rem));animation:toastIn .22s ease">
+          <div>
+            <strong>{{ toast.type === 'success' ? 'Success' : toast.type === 'error' ? 'Error' : 'Info' }}</strong>
+            <p class="mb-0 text-muted">{{ toast.message }}</p>
+          </div>
+          <button type="button" class="toast-close btn btn-link p-0 ms-auto text-body" (click)="notify.dismiss(toast.id)" aria-label="Dismiss notification">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+  <router-outlet />
+}

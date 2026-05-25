@@ -1,0 +1,228 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <a routerLink="/campaigns" class="back-link">← Campaigns</a>
+      <h1 class="page-title">Email Queue</h1>
+      @if (campaign()) {
+        <p class="page-sub">{{ campaign()!.name }}</p>
+      }
+    </div>
+    <button class="btn btn-ghost" (click)="reload()" [disabled]="loading()">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <!-- Summary cards -->
+  @if (summary()) {
+    <div class="summary-grid">
+      <div class="sum-card" [class.active]="statusFilter === ''"
+        (click)="applyFilter('')">
+        <div class="sum-label">Total</div>
+        <div class="sum-value">{{ summary()!.total | number }}</div>
+      </div>
+      <div class="sum-card pending" [class.active]="statusFilter === 'Pending'"
+        (click)="applyFilter('Pending')">
+        <div class="sum-label">Pending</div>
+        <div class="sum-value">{{ summary()!.pending | number }}</div>
+      </div>
+      <div class="sum-card processing" [class.active]="statusFilter === 'Processing'"
+        (click)="applyFilter('Processing')">
+        <div class="sum-label">Processing</div>
+        <div class="sum-value">{{ summary()!.processing | number }}</div>
+      </div>
+      <div class="sum-card sent" [class.active]="statusFilter === 'Sent'"
+        (click)="applyFilter('Sent')">
+        <div class="sum-label">Sent</div>
+        <div class="sum-value">{{ summary()!.sent | number }}</div>
+      </div>
+      <div class="sum-card failed" [class.active]="statusFilter === 'Failed'"
+        (click)="applyFilter('Failed')">
+        <div class="sum-label">Failed</div>
+        <div class="sum-value">{{ summary()!.failed | number }}</div>
+      </div>
+      <div class="sum-card retried" [class.active]="statusFilter === 'Retried'"
+        (click)="applyFilter('Retried')">
+        <div class="sum-label">Retried</div>
+        <div class="sum-value">{{ summary()!.retried | number }}</div>
+      </div>
+    </div>
+
+    @if (summary()!.total > 0) {
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill sent"    [style.width.%]="pct(summary()!.sent, summary()!.total)"></div>
+          <div class="progress-fill failed"  [style.width.%]="pct(summary()!.failed, summary()!.total)"></div>
+          <div class="progress-fill retried" [style.width.%]="pct(summary()!.retried, summary()!.total)"></div>
+          <div class="progress-fill processing" [style.width.%]="pct(summary()!.processing, summary()!.total)"></div>
+        </div>
+        <div class="progress-legend">
+          <span class="leg sent">Sent {{ pct(summary()!.sent, summary()!.total) | number:'1.0-0' }}%</span>
+          <span class="leg failed">Failed {{ pct(summary()!.failed, summary()!.total) | number:'1.0-0' }}%</span>
+          <span class="leg processing">Processing {{ pct(summary()!.processing, summary()!.total) | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Filters -->
+  <div class="filters">
+    <input class="search" [(ngModel)]="search" placeholder="Search email address…" />
+    <span class="filter-info">Showing: <strong>{{ statusFilter || 'All' }}</strong></span>
+  </div>
+
+  <!-- Table + Detail -->
+  <div class="content-layout" [class.has-detail]="selectedItem()">
+
+    <div class="table-section">
+      @if (loading()) {
+        <div class="loading-state">Loading queue…</div>
+      } @else if (items().length === 0) {
+        <div class="empty-state">
+          No queue items found
+          @if (statusFilter) { for status "{{ statusFilter }}" }
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Retries</th>
+                <th>Updated</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of filtered(); track item.id) {
+                <tr
+                  [class.row-failed]="item.status === 'Failed'"
+                  [class.row-sent]="item.status === 'Sent'"
+                  [class.row-selected]="selectedItem()?.id === item.id"
+                  (click)="selectItem(item)"
+                  style="cursor:pointer">
+                  <td class="td-email">{{ item.recipientEmail }}</td>
+                  <td>
+                    <span class="badge" [class]="'badge-' + item.status.toLowerCase()">
+                      {{ item.status }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (item.retryCount > 0) {
+                      <span class="retry-count">{{ item.retryCount }}/{{ item.maxRetries }}</span>
+                    } @else {
+                      <span class="text-muted">0</span>
+                    }
+                  </td>
+                  <td>{{ item.updatedAt | date:'MMM d, HH:mm' }}</td>
+                  <td class="text-right" (click)="$event.stopPropagation()">
+                    @if (item.status === 'Failed' || item.status === 'Retried') {
+                      <button class="action-btn retry-btn"
+                        [disabled]="retrying() === item.id"
+                        (click)="retryItem(item)">
+                        @if (retrying() === item.id) { ⏳ } @else { ↺ }
+                        {{ retrying() === item.id ? 'Retrying…' : 'Retry' }}
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <button class="btn-page" [disabled]="page() === 1"
+            (click)="changePage(page() - 1)">‹ Prev</button>
+          <span class="page-info">Page {{ page() }}</span>
+          <button class="btn-page" [disabled]="items().length < pageSize"
+            (click)="changePage(page() + 1)">Next ›</button>
+          <span class="page-size-label">Rows per page:</span>
+          <select class="page-size-sel" [(ngModel)]="pageSize" (change)="reload()">
+            <option [value]="50">50</option>
+            <option [value]="100">100</option>
+            <option [value]="200">200</option>
+          </select>
+        </div>
+      }
+    </div>
+
+    <!-- Detail panel -->
+    @if (selectedItem()) {
+      <div class="detail-panel">
+        <div class="detail-header">
+          <h3 class="detail-title">Item Details</h3>
+          <button class="detail-close" (click)="selectedItem.set(null)">✕</button>
+        </div>
+        <div class="detail-body">
+
+          <div class="detail-row">
+            <span class="detail-label">Status</span>
+            <span class="badge" [class]="'badge-' + selectedItem()!.status.toLowerCase()">
+              {{ selectedItem()!.status }}
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ selectedItem()!.recipientEmail }}</span>
+          </div>
+          @if (selectedItem()!.recipientName) {
+            <div class="detail-row">
+              <span class="detail-label">Name</span>
+              <span class="detail-value">{{ selectedItem()!.recipientName }}</span>
+            </div>
+          }
+          <div class="detail-row">
+            <span class="detail-label">Retry Count</span>
+            <span class="detail-value">
+              {{ selectedItem()!.retryCount }} / {{ selectedItem()!.maxRetries }}
+            </span>
+          </div>
+          @if (selectedItem()!.nextRetryAt) {
+            <div class="detail-row">
+              <span class="detail-label">Next Retry</span>
+              <span class="detail-value">
+                {{ selectedItem()!.nextRetryAt | date:'MMM d, y HH:mm:ss' }}
+              </span>
+            </div>
+          }
+          @if (selectedItem()!.sesMessageId) {
+            <div class="detail-row">
+              <span class="detail-label">SES Message ID</span>
+              <span class="detail-value detail-mono">{{ selectedItem()!.sesMessageId }}</span>
+            </div>
+          }
+          <div class="detail-row">
+            <span class="detail-label">Created</span>
+            <span class="detail-value">{{ selectedItem()!.createdAt | date:'MMM d, y HH:mm:ss' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Updated</span>
+            <span class="detail-value">{{ selectedItem()!.updatedAt | date:'MMM d, y HH:mm:ss' }}</span>
+          </div>
+
+          @if (selectedItem()!.errorMessage) {
+            <div class="detail-error-section">
+              <div class="detail-label" style="margin-bottom:6px">Error</div>
+              <div class="detail-error-box">{{ selectedItem()!.errorMessage }}</div>
+            </div>
+          }
+
+          @if (selectedItem()!.status === 'Failed' || selectedItem()!.status === 'Retried') {
+            <div class="detail-actions">
+              <button class="retry-btn-lg"
+                [disabled]="retrying() === selectedItem()!.id"
+                (click)="retryItem(selectedItem()!)">
+                @if (retrying() === selectedItem()!.id) { ⏳ Retrying… }
+                @else { ↺ Retry this email now }
+              </button>
+              <div class="retry-hint">Resets retry count and re-sends immediately.</div>
+            </div>
+          }
+
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

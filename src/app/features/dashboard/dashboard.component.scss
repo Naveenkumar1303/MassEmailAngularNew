@@ -1,0 +1,87 @@
+.page { padding: 32px 40px; max-width: 100%; }
+
+// Stats grid
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+
+  &-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+}
+
+.stat-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+.stat-value {
+  font-size: 28px; font-weight: 600; color: var(--text);
+  &.accent { color: var(--accent); }
+  &.danger { color: #d32f2f; }
+}
+
+// Section title
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 12px;
+}
+
+// Health
+.health-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.health-card {
+  padding: 14px 18px;
+  border-radius: 8px;
+  border: 1px solid;
+  min-width: 140px;
+
+  &.health-healthy   { background: #e8f5e9; border-color: #a5d6a7; }
+  &.health-degraded  { background: #fff8e1; border-color: #ffe082; }
+  &.health-unhealthy { background: #ffebee; border-color: #ef9a9a; }
+}
+
+.health-name   { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.health-status {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  .health-healthy &   { color: #2e7d32; }
+  .health-degraded &  { color: #f57f17; }
+  .health-unhealthy & { color: #c62828; }
+}
+.health-detail { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+// Table extras
+.td-name { font-weight: 500; }
+.danger  { color: #d32f2f; }
+
+.view-all {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+// Skeletons
+.skeleton-row  { display: flex; gap: 12px; }
+.table-skeleton { display: flex; flex-direction: column; gap: 8px; }
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200%; }
+  100% { background-position: -200%; }
+}

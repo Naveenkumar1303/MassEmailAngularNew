@@ -1,0 +1,76 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <a routerLink="/campaigns" class="back-link">← Campaigns</a>
+      <h1 class="page-title">New Campaign</h1>
+    </div>
+  </div>
+
+  <div class="form-card" style="max-width:600px">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <div class="field">
+        <label class="label">Campaign name <span class="req">*</span></label>
+        <input formControlName="name"
+          placeholder="e.g. January 2025 Newsletter" />
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <div class="error">Name is required.</div>
+        }
+      </div>
+
+      <div class="field">
+        <label class="label">Email subject <span class="req">*</span></label>
+        <input formControlName="subject" [placeholder]="subjectPlaceholder" />
+        <div class="hint">Supports {{ placeholderSyntax }} syntax</div>
+        @if (form.get('subject')?.invalid && form.get('subject')?.touched) {
+          <div class="error">Subject is required.</div>
+        }
+      </div>
+
+      <div class="field">
+        <label class="label">Template <span class="req">*</span></label>
+        <select formControlName="templateId">
+          <option value="">Select a template…</option>
+          @for (t of templates(); track t.id) {
+            <option [value]="t.id">{{ t.name }}</option>
+          }
+        </select>
+        @if (templates().length === 0) {
+          <div class="hint warning">
+            No templates found.
+            <a routerLink="/templates/new">Create one first →</a>
+          </div>
+        }
+        @if (form.get('templateId')?.invalid && form.get('templateId')?.touched) {
+          <div class="error">Please select a template.</div>
+        }
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Scheduled date/time (UTC) <span class="req">*</span>
+        </label>
+        <input type="datetime-local" formControlName="scheduledAt" />
+        <div class="hint">
+          Must be in the future. One campaign per calendar month.
+        </div>
+        @if (form.get('scheduledAt')?.invalid && form.get('scheduledAt')?.touched) {
+          <div class="error">Please select a future date.</div>
+        }
+      </div>
+
+      <div class="form-actions">
+        <a routerLink="/campaigns" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary"
+          [disabled]="form.invalid || saving()">
+          @if (saving()) {
+            <span class="spinner"></span>
+            Creating…
+          } @else {
+            Create campaign
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

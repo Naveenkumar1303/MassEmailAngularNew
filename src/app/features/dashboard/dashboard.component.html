@@ -1,0 +1,111 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-sub">Overview of your email campaigns</p>
+    </div>
+    <a routerLink="/campaigns/new" class="btn btn-primary">+ New Campaign</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Campaigns</div>
+      <div class="stat-value">{{ campaigns().length }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Emails Sent</div>
+      <div class="stat-value">{{ totalSent() | number }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Running Now</div>
+      <div class="stat-value accent">{{ runningCount() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Failed Emails</div>
+      <div class="stat-value danger">{{ totalFailed() | number }}</div>
+    </div>
+  </div>
+
+  <!-- Health -->
+  <div class="section-title">System health</div>
+  @if (health()) {
+    <div class="health-row">
+      @for (entry of healthEntries(); track entry.name) {
+        <div class="health-card" [class]="'health-' + entry.status.toLowerCase()">
+          <div class="health-name">{{ entry.name }}</div>
+          <div class="health-status">{{ entry.status }}</div>
+          @if (entry.data?.['UsedPercent']) {
+            <div class="health-detail">
+              Quota: {{ entry.data?.['UsedPercent'] }}% used
+            </div>
+          }
+          @if (entry.status === 'Degraded' && entry.description) {
+            <div class="health-detail">{{ entry.description }}</div>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="skeleton-row">
+      <div class="skeleton" style="width:140px;height:72px"></div>
+      <div class="skeleton" style="width:140px;height:72px"></div>
+    </div>
+  }
+
+  <!-- Recent Campaigns -->
+  <div class="section-title" style="margin-top:2rem">Recent campaigns</div>
+
+  @if (loading()) {
+    <div class="table-skeleton">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton" style="height:44px;border-radius:6px"></div>
+      }
+    </div>
+  } @else if (campaigns().length === 0) {
+    <div class="empty-state">
+      <p>No campaigns yet.</p>
+      <a routerLink="/campaigns/new" class="btn btn-primary">
+        Create your first campaign
+      </a>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Scheduled</th>
+            <th>Recipients</th>
+            <th>Sent</th>
+            <th>Failed</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of campaigns().slice(0, 8); track c.id) {
+            <tr>
+              <td class="td-name">{{ c.name }}</td>
+              <td>
+                <span class="badge" [class]="'badge-' + c.status.toLowerCase()">
+                  {{ c.status }}
+                </span>
+              </td>
+              <td>{{ c.scheduledAt | date:'MMM d, y' }}</td>
+              <td>{{ c.totalRecipients | number }}</td>
+              <td>{{ c.sentCount | number }}</td>
+              <td [class.danger]="c.failedCount > 0">
+                {{ c.failedCount | number }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (campaigns().length > 8) {
+      <a routerLink="/campaigns" class="view-all">
+        View all {{ campaigns().length }} campaigns →
+      </a>
+    }
+  }
+</div>

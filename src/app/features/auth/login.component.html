@@ -1,0 +1,44 @@
+<section class="login-shell">
+  <div class="login-card">
+    <div class="login-banner">
+      <span class="login-badge">Secure access</span>
+      <h1>Welcome back to MassEmail</h1>
+      <p>
+        Sign in with your demo credentials to unlock the dashboard, queue insights,
+        and campaign management tools.
+      </p>
+    </div>
+
+    <form class="login-form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="name@company.com" />
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <small class="field-error">Enter a valid email address.</small>
+        }
+      </div>
+
+      <div class="field-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="••••••••" />
+        @if (form.get('password')?.invalid && form.get('password')?.touched) {
+          <small class="field-error">Password is required.</small>
+        }
+      </div>
+
+      <div class="demo-helper">
+        <span class="demo-label">Demo access</span>
+        <p>Use any email and password combination to continue.</p>
+      </div>
+
+      <button class="btn btn-primary w-100" type="submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <span class="spinner"></span>
+          Signing in…
+        } @else {
+          Sign in
+        }
+      </button>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,96 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <a routerLink="/templates" class="back-link">← Templates</a>
+      <h1 class="page-title">{{ isEdit() ? 'Edit Template' : 'New Template' }}</h1>
+    </div>
+  </div>
+
+  <div class="split-layout">
+    <div class="form-panel">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+
+        <div class="field">
+          <label class="label">Template name <span class="req">*</span></label>
+          <input formControlName="name" placeholder="e.g. Monthly Newsletter" />
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <div class="error">Name is required.</div>
+          }
+        </div>
+
+        <div class="field">
+          <label class="label">Subject line <span class="req">*</span></label>
+          <input formControlName="subject" [placeholder]="subjectPlaceholder" />
+          @if (form.get('subject')?.invalid && form.get('subject')?.touched) {
+            <div class="error">Subject is required.</div>
+          }
+        </div>
+
+        <div class="field">
+          <label class="label">
+            HTML body <span class="req">*</span>
+            <span class="hint-inline">Use {{ placeholderHint }}</span>
+          </label>
+          <textarea formControlName="htmlBody" rows="14"
+            [placeholder]="htmlPlaceholder"
+            (input)="updatePreview()">
+          </textarea>
+          @if (form.get('htmlBody')?.invalid && form.get('htmlBody')?.touched) {
+            <div class="error">HTML body is required.</div>
+          }
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Plain text <span class="opt">(optional)</span>
+          </label>
+          <textarea formControlName="plainBody" rows="4"
+            [placeholder]="plainPlaceholder">
+          </textarea>
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Placeholders <span class="opt">(optional)</span>
+          </label>
+          <input formControlName="placeholders" [placeholder]="placeholdersHint" />
+          <div class="hint">JSON array of placeholder keys</div>
+        </div>
+
+        @if (isEdit()) {
+          <div class="field">
+            <label class="toggle-label">
+              <input type="checkbox" formControlName="isActive" />
+              <span>Active</span>
+            </label>
+          </div>
+        }
+
+        <div class="form-actions">
+          <a routerLink="/templates" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn btn-primary"
+            [disabled]="form.invalid || saving()">
+            @if (saving()) {
+              <span class="spinner"></span>
+              Saving…
+            } @else {
+              {{ isEdit() ? 'Save changes' : 'Create template' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="preview-panel">
+      <div class="preview-header">Live preview</div>
+      @if (previewHtml()) {
+        <iframe class="preview-frame"
+          [srcdoc]="previewHtml()!"
+          sandbox="allow-same-origin">
+        </iframe>
+      } @else {
+        <div class="preview-empty">Start typing HTML to see the preview</div>
+      }
+    </div>
+  </div>
+</div>

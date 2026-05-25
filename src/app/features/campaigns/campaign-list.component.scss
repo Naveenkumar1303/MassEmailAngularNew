@@ -1,0 +1,19 @@
+.page { padding: 32px 40px; max-width: 100%; }
+
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .search { flex: 1; max-width: 320px; }
+  .filter-select { width: 160px; }
+}
+
+.td-name { font-weight: 500; }
+.danger  { color: #d32f2f; }
+.text-right { text-align: right; }
+
+.row-failed {
+  background: #fff8f8;
+  @media (prefers-color-scheme: dark) { background: #2a1515; }
+}
