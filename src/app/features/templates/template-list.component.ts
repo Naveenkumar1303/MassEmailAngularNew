@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { TemplateService } from '@core/services/template.service';
 import { NotificationService } from '@core/services/notification.service';
 import { EmailTemplate } from '@core/models/models';
-
+ 
 @Component({
   selector: 'app-template-list',
   standalone: true,
