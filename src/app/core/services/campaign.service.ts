@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { Campaign, CreateCampaignRequest, TriggerResponse, PageRequest } from '@core/models/models';
+import { Campaign, CreateCampaignRequest, UpdateCampaignRequest, TriggerResponse, PageRequest } from '@core/models/models';
 
 @Injectable({ providedIn: 'root' })
 export class CampaignService {
@@ -22,6 +22,10 @@ export class CampaignService {
 
   create(body: CreateCampaignRequest): Observable<{ id: string }> {
     return this.http.post<{ id: string }>(this.base, body);
+  }
+
+  update(id: string, body: UpdateCampaignRequest): Observable<void> {
+    return this.http.put<void>(`${this.base}/${id}`, body);
   }
 
   trigger(id: string): Observable<TriggerResponse> {

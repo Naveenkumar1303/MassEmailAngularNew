@@ -5,6 +5,10 @@ export type CampaignStatus =
 export interface Campaign {
   id: string;
   name: string;
+  subject?: string;
+  fromName?: string;
+  fromEmail?: string;
+  templateId?: string;
   status: CampaignStatus;
   scheduledAt: string;
   totalRecipients: number | null;
@@ -15,6 +19,17 @@ export interface Campaign {
 export interface CreateCampaignRequest {
   name: string;
   subject: string;
+  fromName: string;
+  fromEmail: string;
+  templateId: string;
+  scheduledAt: string;
+}
+
+export interface UpdateCampaignRequest {
+  name: string;
+  subject: string;
+  fromName: string;
+  fromEmail: string;
   templateId: string;
   scheduledAt: string;
 }

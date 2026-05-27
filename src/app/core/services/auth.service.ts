@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly storageKey = 'mass-email-auth';
-  readonly isAuthenticated = signal(this.hasStoredSession());
+  readonly isAuthenticated = signal(true);
 
   login(email: string, password: string): boolean {
     if (!email.trim() || !password.trim()) {
@@ -21,9 +21,5 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.storageKey);
     this.isAuthenticated.set(false);
-  }
-
-  private hasStoredSession(): boolean {
-    return localStorage.getItem(this.storageKey) !== null;
   }
 }

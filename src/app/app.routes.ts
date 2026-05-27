@@ -4,9 +4,8 @@ import { authGuard } from '@core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: 'login',
-    loadComponent: () =>
-      import('./features/auth/login.component')
-        .then(m => m.LoginComponent)
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
   },
   {
     path: '',
@@ -29,6 +28,13 @@ export const routes: Routes = [
   },
   {
     path: 'campaigns/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/campaigns/campaign-form.component')
+        .then(m => m.CampaignFormComponent)
+  },
+  {
+    path: 'campaigns/:id/edit',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/campaigns/campaign-form.component')

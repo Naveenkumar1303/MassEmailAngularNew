@@ -325,6 +325,17 @@ textarea:focus {
   color: var(--text);
 }
 
+.action-btn.edit-btn {
+  background: #e8f0fe;
+  border-color: #c5d4f6;
+  color: #1a56db;
+  @media (prefers-color-scheme: dark) {
+    background: #1e2d54;
+    border-color: #2d4580;
+    color: #7fa7f7;
+  }
+}
+
 .pagination {
   display: flex;
   align-items: center;

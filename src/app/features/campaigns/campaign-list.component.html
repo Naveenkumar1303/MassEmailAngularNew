@@ -60,6 +60,13 @@
                     ☰ Queue
                   </button>
 
+                  @if (c.status === 'Draft' || c.status === 'Scheduled') {
+                    <button class="action-btn edit-btn"
+                      (click)="goToEdit(c.id)">
+                      ✎ Edit
+                    </button>
+                  }
+
                   @if (c.status === 'Scheduled' || c.status === 'Draft') {
                     <button class="action-btn trigger-btn"
                       [disabled]="actioning() === c.id"

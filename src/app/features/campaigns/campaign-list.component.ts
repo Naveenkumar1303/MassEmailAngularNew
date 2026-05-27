@@ -52,6 +52,10 @@ export class CampaignListComponent implements OnInit {
     this.router.navigate(['/campaigns', id, 'queue']);
   }
 
+  goToEdit(id: string): void {
+    this.router.navigate(['/campaigns', id, 'edit']);
+  }
+
   trigger(c: Campaign): void {
     this.actioning.set(c.id);
     this.svc.trigger(c.id).subscribe({
