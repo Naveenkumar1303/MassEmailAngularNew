@@ -48,6 +48,13 @@ export const routes: Routes = [
         .then(m => m.QueueComponent)
   },
   {
+    path: 'campaigns/:campaignId/tracking',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/campaigns/campaign-tracking.component')
+        .then(m => m.CampaignTrackingComponent)
+  },
+  {
     path: 'templates',
     canActivate: [authGuard],
     loadComponent: () =>

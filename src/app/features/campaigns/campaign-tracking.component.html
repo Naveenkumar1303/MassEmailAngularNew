@@ -1,0 +1,191 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <a routerLink="/campaigns" class="back-link">← Campaigns</a>
+      <h1 class="page-title">Email View Tracking</h1>
+      @if (campaign()) {
+        <p class="page-sub">{{ campaign()!.name }}</p>
+      }
+    </div>
+    <button class="btn btn-ghost" (click)="load()" [disabled]="loading()">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <!-- Summary cards -->
+  @if (summary()) {
+    <div class="summary-grid">
+      <div class="sum-card">
+        <div class="sum-label">Total Sent</div>
+        <div class="sum-value">{{ summary()!.totalSent | number }}</div>
+      </div>
+      <div class="sum-card viewed" [class.active]="activeTab() === 'viewed'"
+        (click)="switchTab('viewed')">
+        <div class="sum-label">Viewed</div>
+        <div class="sum-value">{{ summary()!.viewed | number }}</div>
+        <div class="sum-pct">{{ pct(summary()!.viewed, summary()!.totalSent) | number:'1.0-0' }}%</div>
+      </div>
+      <div class="sum-card not-viewed" [class.active]="activeTab() === 'not-viewed'"
+        (click)="switchTab('not-viewed')">
+        <div class="sum-label">Not Viewed</div>
+        <div class="sum-value">{{ summary()!.notViewed | number }}</div>
+        <div class="sum-pct">{{ pct(summary()!.notViewed, summary()!.totalSent) | number:'1.0-0' }}%</div>
+      </div>
+      <div class="sum-card rate">
+        <div class="sum-label">View Rate</div>
+        <div class="sum-value">{{ summary()!.viewRate | number:'1.0-1' }}%</div>
+      </div>
+    </div>
+
+    @if (summary()!.totalSent > 0) {
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill viewed"
+            [style.width.%]="pct(summary()!.viewed, summary()!.totalSent)"></div>
+        </div>
+        <div class="progress-legend">
+          <span class="leg viewed">Viewed {{ pct(summary()!.viewed, summary()!.totalSent) | number:'1.0-0' }}%</span>
+          <span class="leg not-viewed">Not Viewed {{ pct(summary()!.notViewed, summary()!.totalSent) | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Re-trigger banner -->
+  @if (summary() && summary()!.notViewed > 0) {
+    <div class="retrigger-banner">
+      <div class="retrigger-info">
+        <span class="retrigger-icon">⏰</span>
+        <div>
+          <strong>{{ summary()!.notViewed }} recipient(s)</strong> have not viewed the email yet.
+          @if (activeTab() === 'not-viewed' && resendableCount() > 0) {
+            <span class="retrigger-hint">
+              <strong>{{ resendableCount() }}</strong> on this page are eligible (sent ≥ 24 h ago).
+            </span>
+          } @else {
+            <span class="retrigger-hint">Only recipients sent ≥ 24 h ago will be included.</span>
+          }
+        </div>
+      </div>
+      <button class="btn btn-retrigger"
+        [disabled]="triggering()"
+        (click)="reTrigger()">
+        @if (triggering()) { ⏳ Re-triggering… } @else { ↻ Re-trigger to Not-Viewed }
+      </button>
+    </div>
+  }
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab() === 'viewed'"
+      (click)="switchTab('viewed')">
+      ✓ Viewed ({{ summary()?.viewed ?? 0 | number }})
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'not-viewed'"
+      (click)="switchTab('not-viewed')">
+      ✗ Not Viewed ({{ summary()?.notViewed ?? 0 | number }})
+    </button>
+  </div>
+
+  <!-- Search + Resend Selected -->
+  <div class="filters">
+    <input class="search" [(ngModel)]="search" placeholder="Search email or name…" />
+    <span class="filter-info">
+      Showing: <strong>{{ activeTab() === 'viewed' ? 'Viewed' : 'Not Viewed' }}</strong>
+    </span>
+    @if (activeTab() === 'not-viewed' && selectedCount() > 0) {
+      <button class="btn btn-resend-selected" [disabled]="triggering()" (click)="reTriggerSelected()">
+        @if (triggering()) { ⏳ Sending… } @else { ↻ Resend to Selected ({{ selectedCount() }}) }
+      </button>
+    }
+  </div>
+
+  <!-- Table -->
+  @if (loading()) {
+    <div class="loading-state">Loading…</div>
+  } @else if (filtered().length === 0) {
+    <div class="empty-state">
+      No recipients found for "{{ activeTab() === 'viewed' ? 'Viewed' : 'Not Viewed' }}".
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            @if (activeTab() === 'not-viewed') {
+              <th class="th-check">
+                <input type="checkbox"
+                  [checked]="isAllEligibleSelected()"
+                  [disabled]="resendableCount() === 0"
+                  (change)="toggleSelectAll()" />
+              </th>
+            }
+            <th>Email</th>
+            <th>Name</th>
+            <th>Status</th>
+            @if (activeTab() === 'viewed') {
+              <th>Viewed At</th>
+            } @else {
+              <th>Sent At</th>
+              <th>Resend Eligible</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filtered(); track item.queueItemId) {
+            <tr [class.row-viewed]="item.viewed"
+                [class.row-not-viewed]="!item.viewed"
+                [class.row-selected]="isSelected(item.queueItemId)">
+              @if (activeTab() === 'not-viewed') {
+                <td class="td-check">
+                  <input type="checkbox"
+                    [checked]="isSelected(item.queueItemId)"
+                    [disabled]="!item.canResend"
+                    (change)="toggleSelect(item.queueItemId)" />
+                </td>
+              }
+              <td class="td-email">{{ item.recipientEmail }}</td>
+              <td>{{ item.recipientName ?? '—' }}</td>
+              <td>
+                @if (item.viewed) {
+                  <span class="badge badge-viewed">Viewed</span>
+                } @else {
+                  <span class="badge badge-not-viewed">Not Viewed</span>
+                }
+              </td>
+              @if (activeTab() === 'viewed') {
+                <td>{{ item.viewedAt | date:'MMM d, y HH:mm' }}</td>
+              } @else {
+                <td>{{ item.sentAt ? (item.sentAt | date:'MMM d, y HH:mm') : '—' }}</td>
+                <td>
+                  @if (item.canResend) {
+                    <span class="badge badge-can-resend">Yes</span>
+                  } @else {
+                    <span class="badge badge-no-resend">No</span>
+                  }
+                  @if (item.sentAt) {
+                    <span class="hours-hint">{{ hoursSince(item.sentAt) }}h ago</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button class="btn-page" [disabled]="page() === 1"
+        (click)="changePage(page() - 1)">‹ Prev</button>
+      <span class="page-info">Page {{ page() }}</span>
+      <button class="btn-page" [disabled]="items().length < pageSize"
+        (click)="changePage(page() + 1)">Next ›</button>
+      <span class="page-size-label">Rows per page:</span>
+      <select class="page-size-sel" [(ngModel)]="pageSize" (change)="changePage(1)">
+        <option [value]="50">50</option>
+        <option [value]="100">100</option>
+        <option [value]="200">200</option>
+      </select>
+    </div>
+  }
+</div>

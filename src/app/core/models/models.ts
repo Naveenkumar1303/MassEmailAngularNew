@@ -113,3 +113,30 @@ export interface QueueSummary {
   retried: number;
   total: number;
 }
+
+// ─── Email View Tracking ─────────────────────────────────────────
+export interface EmailTrackingItem {
+  recipientEmail: string;
+  recipientName: string | null;
+  viewedAt: string | null;
+  viewed: boolean;
+  sentAt: string | null;
+  queueItemId: string;
+  canResend: boolean;
+}
+
+export interface TrackingSummary {
+  totalSent: number;
+  viewed: number;
+  notViewed: number;
+  viewRate: number;
+}
+
+export interface ReTriggerResponse {
+  message: string;
+  retriggeredCount: number;
+}
+
+export interface ReTriggerSelectedRequest {
+  queueItemIds: string[];
+}

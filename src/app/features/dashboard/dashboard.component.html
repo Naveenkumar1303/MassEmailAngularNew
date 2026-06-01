@@ -9,22 +9,22 @@
 
   <!-- Stats -->
   <div class="stats-grid">
-    <div class="stat-card">
+    <a class="stat-card stat-link" routerLink="/campaigns">
       <div class="stat-label">Total Campaigns</div>
       <div class="stat-value">{{ campaigns().length }}</div>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a class="stat-card stat-link" routerLink="/campaigns" [queryParams]="{status: 'Completed'}">
       <div class="stat-label">Emails Sent</div>
       <div class="stat-value">{{ totalSent() | number }}</div>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a class="stat-card stat-link" routerLink="/campaigns" [queryParams]="{status: 'Running'}">
       <div class="stat-label">Running Now</div>
       <div class="stat-value accent">{{ runningCount() }}</div>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a class="stat-card stat-link" routerLink="/campaigns" [queryParams]="{status: 'Failed'}">
       <div class="stat-label">Failed Emails</div>
       <div class="stat-value danger">{{ totalFailed() | number }}</div>
-    </div>
+    </a>
   </div>
 
   <!-- Health -->
@@ -93,9 +93,23 @@
               </td>
               <td>{{ c.scheduledAt | date:'MMM d, y' }}</td>
               <td>{{ c.totalRecipients | number }}</td>
-              <td>{{ c.sentCount | number }}</td>
+              <td>
+                <a class="count-link"
+                  [routerLink]="['/campaigns', c.id, 'queue']"
+                  [queryParams]="{status: 'Sent'}">
+                  {{ c.sentCount | number }}
+                </a>
+              </td>
               <td [class.danger]="c.failedCount > 0">
-                {{ c.failedCount | number }}
+                @if (c.failedCount > 0) {
+                  <a class="count-link danger"
+                    [routerLink]="['/campaigns', c.id, 'queue']"
+                    [queryParams]="{status: 'Failed'}">
+                    {{ c.failedCount | number }}
+                  </a>
+                } @else {
+                  {{ c.failedCount | number }}
+                }
               </td>
             </tr>
           }

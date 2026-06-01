@@ -49,9 +49,27 @@
               </td>
               <td>{{ c.scheduledAt | date:'MMM d, y' }}</td>
               <td>{{ c.totalRecipients | number }}</td>
-              <td>{{ c.sentCount | number }}</td>
+              <td>
+                @if (c.sentCount > 0) {
+                  <a class="count-link"
+                    [routerLink]="['/campaigns', c.id, 'queue']"
+                    [queryParams]="{status: 'Sent'}">
+                    {{ c.sentCount | number }}
+                  </a>
+                } @else {
+                  {{ c.sentCount | number }}
+                }
+              </td>
               <td [class.danger]="c.failedCount > 0">
-                {{ c.failedCount | number }}
+                @if (c.failedCount > 0) {
+                  <a class="count-link danger"
+                    [routerLink]="['/campaigns', c.id, 'queue']"
+                    [queryParams]="{status: 'Failed'}">
+                    {{ c.failedCount | number }}
+                  </a>
+                } @else {
+                  {{ c.failedCount | number }}
+                }
               </td>
               <td>
                 <div class="action-btns">
@@ -59,6 +77,13 @@
                     (click)="goToQueue(c.id)">
                     ☰ Queue
                   </button>
+
+                  @if (c.status === 'Completed' || c.status === 'Running') {
+                    <button class="action-btn tracking-btn"
+                      (click)="goToTracking(c.id)">
+                      👁 Tracking
+                    </button>
+                  }
 
                   @if (c.status === 'Draft' || c.status === 'Scheduled') {
                     <button class="action-btn edit-btn"

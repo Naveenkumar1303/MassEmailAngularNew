@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, Input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -22,6 +22,8 @@ export class CampaignListComponent implements OnInit {
   readonly loading    = signal(true);
   readonly actioning  = signal<string | null>(null);
   readonly page       = signal(1);
+
+  @Input() set status(val: string) { if (val) this.statusFilter = val; }
 
   search       = '';
   statusFilter = '';
@@ -50,6 +52,10 @@ export class CampaignListComponent implements OnInit {
 
   goToQueue(id: string): void {
     this.router.navigate(['/campaigns', id, 'queue']);
+  }
+
+  goToTracking(id: string): void {
+    this.router.navigate(['/campaigns', id, 'tracking']);
   }
 
   goToEdit(id: string): void {

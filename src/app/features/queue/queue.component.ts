@@ -17,6 +17,7 @@ import { forkJoin } from 'rxjs';
 })
 export class QueueComponent implements OnInit {
   @Input() campaignId!: string;
+  @Input() set status(val: string) { if (val) this.statusFilter = val; }
 
   private readonly queueSvc    = inject(QueueService);
   private readonly campaignSvc = inject(CampaignService);

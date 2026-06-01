@@ -1,5 +1,13 @@
 .page { padding: 32px 40px; max-width: 100%; }
 
+/* action buttons shared style expected from global — define tracking-btn locally */
+.tracking-btn {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+  &:hover:not(:disabled) { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+}
+
 .filters {
   display: flex;
   gap: 12px;
@@ -12,6 +20,14 @@
 .td-name { font-weight: 500; }
 .danger  { color: #d32f2f; }
 .text-right { text-align: right; }
+
+.count-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  &:hover { text-decoration: underline; }
+  &.danger { color: #d32f2f; }
+}
 
 .row-failed {
   background: #fff8f8;
